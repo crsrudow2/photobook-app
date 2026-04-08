@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ProjectStatus {
+  DRAFT
+  COMPLETE
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String?
+  passwordHash String?
+  role         UserRole   @default(USER)
+  createdAt    DateTime   @default(now())
+  projects     Project[]
+  cartItems    CartItem[]
+  orders       Order[]
+}
+
+model Product {
+  id          String     @id @default(cuid())
+  name        String
+  description String
+  category    String
+  basePrice   Float
+  sizes       Json       @default("[]")
+  coverTypes  Json       @default("[]")
+  pageOptions Json       @default("[]")
+  images      Json       @default("[]")
+  slug        String     @unique
+  active      Boolean    @default(true)
+  templates   Template[]
+  projects    Project[]
+}
+
+model Template {
+  id        String    @id @default(cuid())
+  name      String
+  category  String
+  thumbnail String
+  fabricJson Json
+  pageCount Int
+  productId String?
+  product   Product?  @relation(fields: [productId], references: [id])
+  projects  Project[]
+}
+
+model Project {
+  id         String        @id @default(cuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id])
+  productId  String
+  product    Product       @relation(fields: [productId], references: [id])
+  templateId String?
+  template   Template?     @relation(fields: [templateId], references: [id])
+  title      String
+  fabricJson Json          @default("{}")
+  status     ProjectStatus @default(DRAFT)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  quantity  Int      @default(1)
+  price     Float
+  options   Json     @default("{}")
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  status          OrderStatus @default(PENDING)
+  total           Float
+  shippingAddress Json
+  createdAt       DateTime    @default(now())
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  quantity  Int
+  price     Float
+  options   Json     @default("{}")
+}
