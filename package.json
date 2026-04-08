@@ -1,5 +1,5 @@
 {
-  "name": "photobook-app-scaffold",
+  "name": "photobook-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -19,6 +19,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/pg": "^8.20.0",
     "bcryptjs": "^3.0.3",
+    "fabric": "^7.2.0",
     "next": "16.2.3",
     "next-auth": "^4.24.13",
     "pg": "^8.20.0",
